@@ -93,8 +93,9 @@ public class JobController {
 
 	/*--select Value (Filter)--*/
 	public void selectionChangeValue(SelectionEvent e) {
-		String strValue = m_jobGui.getComboValue().getText();
-		JobState state =JobState.valueOf(strValue.intern());//Worker Pool faile;
+		String strValue = m_jobGui.getComboValue().getText().replace(" ","");
+		System.out.println(strValue);
+		JobState state =JobState.valueOf(strValue.trim());//Worker Pool faile becau 
 		System.out.println(state);
 		
 		filterState(state);
@@ -103,6 +104,10 @@ public class JobController {
 	}
 	
 	private void filterState(JobState state) {
+		//for(int i = m_jobGui.getTree().getItems().length - 1; i > 0 ; i--){
+			m_jobGui.getTree().removeAll();
+			
+		//}
 		String target="-1";
 		for(int i = 0; i < m_jobs.size(); i++){
 				if(m_jobs.get(i).getState()[0].equalsIgnoreCase(state.getState())){
