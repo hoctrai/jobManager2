@@ -1,27 +1,29 @@
 package com.tma.nht.view;
 
+import java.util.LinkedList;
 
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 
 import com.tma.nht.controller.JobController;
 
@@ -32,9 +34,11 @@ public class JobManangerGUI {
 	private Menu m_menu;
 	private Combo m_comboType;
 	private Combo m_comboValue;
-	private TreeViewer m_viewer;
 	private Table m_table;
-
+	private LinkedList<TableItem> m_items;
+	private Tree m_tree;
+	
+	
 	private Text m_txtDetail;
 
 	public static void main(String[] args) {
@@ -45,7 +49,7 @@ public class JobManangerGUI {
 		
 		Display display = new Display();
 		Shell shell = new Shell(display);
-		shell.setSize(1000, 540);
+		shell.setSize(1066, 540);
 		shell.setLayout(new GridLayout(1, false));
 		
 		initMenu(shell);
@@ -75,27 +79,27 @@ public class JobManangerGUI {
 	
 	/*---call event ---*/
 	private void addListeners() {
-		/*--Viewer--*/
-		m_viewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			
+		/*--TreeViewer--*/
+		m_tree.addListener(SWT.Selection, new Listener() {
+
 			@Override
-			public void selectionChanged(SelectionChangedEvent e) {
+			public void handleEvent(Event e) {
 				JobController.jobController.selectionChange(e);
 			}
 		});
 		/*--end--*/
-		
+
 		/*--filter--*/
 		m_comboType.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e){
+			public void widgetSelected(SelectionEvent e) {
 				JobController.jobController.selectionChangeType(e);
 			}
 		});
-		
+
 		m_comboValue.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e){
+			public void widgetSelected(SelectionEvent e) {
 				JobController.jobController.selectionChangeValue(e);
 			}
 		});
@@ -116,24 +120,71 @@ public class JobManangerGUI {
 		grpLeft.setLayout(new GridLayout(1, false));
 		grpLeft.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 		
-		m_viewer = new TreeViewer(grpLeft, SWT.BORDER);
-		Tree tree = m_viewer.getTree();
+		m_tree = new Tree(grpLeft, SWT.BORDER);
 		GridData gd_treeView = new GridData(GridData.FILL_VERTICAL);
 		gd_treeView.widthHint=150;
-		tree.setLayoutData(gd_treeView);
+		m_tree.setLayoutData(gd_treeView);
+		
+		
+		
+		
 		
 		Group grpRight = new Group(bottom, SWT.NONE);
 		grpRight.setText("Description");
 		grpRight.setLayout(new GridLayout(1, false));
 		grpRight.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		m_table = new Table(grpRight, SWT.NONE);
-		m_table.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		m_table = new Table(grpRight, SWT.BORDER | SWT.FULL_SELECTION);
+		GridData gd_table = new GridData(GridData.FILL_HORIZONTAL);
+		gd_table.heightHint = 150;
+		m_table.setLayoutData(gd_table);
+		m_table.setHeaderVisible(true);
+		m_table.setLinesVisible(true);
+		createColumnTable();
+		m_items = new LinkedList<>();
 		
 		m_txtDetail = new Text(grpRight, SWT.BORDER | SWT.MULTI);
 		m_txtDetail.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
+		
 	}
+	
+	private void createColumnTable() {
+		TableColumn columnIdJob = new TableColumn(m_table, SWT.CENTER);
+		columnIdJob.setWidth(120);
+		columnIdJob.setText("Id Job");
+		
+		TableColumn columnCategory = new TableColumn(m_table, SWT.BORDER);
+		columnCategory.setWidth(100);
+		columnCategory.setText("Categoryjob");
+		
+		TableColumn columnJobType = new TableColumn(m_table, SWT.CENTER);
+		columnJobType.setWidth(130);
+		columnJobType.setText("Job Type");
+		
+		TableColumn columnSubmitTime = new TableColumn(m_table, SWT.CENTER);
+		columnSubmitTime.setWidth(170);
+		columnSubmitTime.setText("Submit Time");
+		
+		TableColumn columnStartTime = new TableColumn(m_table, SWT.CENTER);
+		columnStartTime.setWidth(180);
+		columnStartTime.setText("Start Time");
+		
+		TableColumn columnTimeOut = new TableColumn(m_table, SWT.CENTER);
+		columnTimeOut.setWidth(76);
+		columnTimeOut.setText("Time Out");
+		
+		TableColumn columnServer = new TableColumn(m_table, SWT.CENTER);
+		columnServer.setWidth(150);
+		columnServer.setText("Server");
+		
+	}
+
+	public TableItem createItemTable() {
+		return new TableItem(m_table, SWT.NONE);
+		
+	}
+
 	/*---get Filter---*/
 	private void initTop() {
 		GridData gd_top = new GridData(GridData.FILL_HORIZONTAL);
@@ -155,24 +206,9 @@ public class JobManangerGUI {
 		gd_comboType.widthHint = 103;
 		m_comboType = new Combo(top, SWT.NONE);
 		m_comboType.setLayoutData(gd_comboType);
-		String[] itemsType = {"Target: ", "Catergoryjob: ", "States: "};
+		String[] itemsType = {"Target:", "Catergoryjob:", "States:"};
 		m_comboType.setItems(itemsType);
 		
-		
-//		Button rdbTarget = new Button(top, SWT.RADIO);
-//		rdbTarget.addSelectionListener(new SelectionAdapter() {
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				
-//			}
-//		});
-//		rdbTarget.setText("Target");
-//		
-//		Button rdbCatergoryjob = new Button(top, SWT.RADIO);
-//		rdbCatergoryjob.setText("Catergoryjob");
-//		
-//		Button rdbStates = new Button(top, SWT.RADIO);
-//		rdbStates.setText("States");
 		
 		Label lblValue = new Label(top, SWT.NONE);
 		lblValue.setText("Value: ");
@@ -182,6 +218,7 @@ public class JobManangerGUI {
 		m_comboValue = new Combo(top, SWT.NONE);
 		m_comboValue.setLayoutData(gd_comboValue);
 		m_comboValue.setEnabled(false);
+		new Label(top, SWT.NONE);
 		new Label(top, SWT.NONE);
 		new Label(top, SWT.NONE);
 		new Label(top, SWT.NONE);
@@ -238,7 +275,7 @@ public class JobManangerGUI {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				JobController.jobController.loadViewer();
+				JobController.jobController.readFile();
 				
 			}
 			
@@ -273,13 +310,6 @@ public class JobManangerGUI {
 		this.m_comboValue = m_comboValue;
 	}
 
-	public TreeViewer getViewer() {
-		return m_viewer;
-	}
-	public void setViewer(TreeViewer m_viewer) {
-		this.m_viewer = m_viewer;
-	}
-
 	public Table getTable() {
 		return m_table;
 	}
@@ -294,6 +324,20 @@ public class JobManangerGUI {
 		this.m_menu = menu;
 	}
 	
+	public LinkedList<TableItem> getItems() {
+		return m_items;
+	}
+	public void setItems(LinkedList<TableItem> items) {
+		this.m_items = items;
+	}
+
+	public Tree getTree() {
+		return m_tree;
+	}
+
+	public void setTree(Tree m_tree) {
+		this.m_tree = m_tree;
+	}
 	
 	
 }
