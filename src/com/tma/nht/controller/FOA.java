@@ -5,6 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -17,12 +20,12 @@ import org.jsoup.nodes.Document;
 import com.tma.nht.model.JobObject;
 
 /*File object access*/ 
-public class FOA {
+public class FOA<T extends JobObject> {
 	private static final String TARGET_KEY="Target: ";
 	private static final String STATES_KEY="Planned, Ongoing, Started";
 	private static final String DATA_KEY="submitTime";
 	
-	private List<JobObject> m_jobs;
+	private List<T> m_jobs;
 	private List<String> m_strTargets;
 	
 	public FOA(String path){
@@ -42,21 +45,29 @@ public class FOA {
 			
 			try {
 				while((line = inp.readLine())!=null){
-					getJob(line, inp);
+					getJob(line, inp,m_jobs);
 					
 				}
 				in.close();
 				inp.close();
 			} catch (IOException e) {
-				// TODO: handle excep tion
+				
 			}
 			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+		
+		Collections.sort(m_jobs, new Comparator<T>() {
+
+			@Override
+			public int compare(T o1, T o2) {
+				return ((JobObject)o1).getTargetId() - ((JobObject)o2).getTargetId();
+			}
+		});
 	}
 
-	private void getJob(String line, BufferedReader inp) {
+	private void getJob(String line, BufferedReader inp, List<T> jobs) {
 		int targetId=0;
 		String status="",data="";
 		
@@ -83,11 +94,11 @@ public class FOA {
 			else if(strTitle.contains(DATA_KEY)&&status!=""){
 				data = strTitle;
 				String[] state = {status,data};
-				JobObject job = dissectStrData(data);
+				T job = dissectStrData(data);
 				job.setTargetId(targetId);
 				job.setState(state);
 				job.toString();
-				m_jobs.add(job);
+				jobs.add(job);
 				
 				m_strTargets.add("Target: " +targetId);
 			}
@@ -99,14 +110,14 @@ public class FOA {
 		}
 	}
 
-	private JobObject dissectStrData(String data) {
+	private T dissectStrData(String data) {
 		
 		String[] strParent = data.split(",");
 		String[] strChild = strParent[0].split(":");
 		
 		long id = Long.parseLong(strChild[0].trim());
 		String type = strChild[2];
-		String category = strChild[1].split(" ")[1];
+		String category = strChild[1].split(" ")[2];
 		
 		String submit = "", start = "", timeout = "", server = "";
 		for(int k = 1; k < strParent.length; k++){
@@ -121,14 +132,14 @@ public class FOA {
 			else if(k==4)
 				server = opt.filter(x->x.contains("Server")).get().replaceAll("Server:", "");
 		}
-		return new JobObject(id, category, type, submit, start, timeout, server);
+		return (T) new JobObject(id, category, type, submit, start, timeout, server);
 	}
 
 	/*--get(), set()--*/
-	public List<JobObject> getJobs() {
+	public List<T> getJobs() {
 		return m_jobs;
 	}
-	public void setJobs(List<JobObject> jobs) {
+	public void setJobs(List<T> jobs) {
 		this.m_jobs = jobs;
 	}
 
@@ -138,5 +149,6 @@ public class FOA {
 	public void setStrTargets(List<String> strTargets) {
 		this.m_strTargets = strTargets;
 	}
+	
 	
 }

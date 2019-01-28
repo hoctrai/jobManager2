@@ -3,6 +3,8 @@ package com.tma.nht.view;
 import java.util.LinkedList;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -23,7 +25,6 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeItem;
 
 import com.tma.nht.controller.JobController;
 
@@ -37,6 +38,7 @@ public class JobManangerGUI {
 	private Table m_table;
 	private LinkedList<TableItem> m_items;
 	private Tree m_tree;
+	private TableItem m_item;
 	
 	
 	private Text m_txtDetail;
@@ -104,6 +106,12 @@ public class JobManangerGUI {
 			}
 		});
 		/*--end--*/
+		 m_table.addSelectionListener(new SelectionAdapter() {
+			 @Override
+				public void widgetSelected(SelectionEvent e) {
+					System.out.println(e.text);
+				}
+		});
 	}
 
 
@@ -242,25 +250,11 @@ public class JobManangerGUI {
 		
 		final MenuItem exitItem = new MenuItem(fileMenu, SWT.PUSH);
 		exitItem.setText("Exit");
-		
-		final MenuItem window = new MenuItem(m_menu, SWT.CASCADE);
-		window.setText("Window");
-		
-		final Menu windowMenu = new Menu(shell,SWT.DROP_DOWN);
-		window.setMenu(windowMenu);
-		
-		final MenuItem maxItem = new MenuItem(windowMenu, SWT.PUSH);
-		maxItem.setText("Maximize");
-		
-		final MenuItem minItem = new MenuItem(windowMenu, SWT.PUSH);
-		minItem.setText("Minimize");
-		
+
 		exitItem.addSelectionListener(new SelectionListener() {
-			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
+				JobController.jobController.exit();
 			}
 			
 			@Override
@@ -271,18 +265,13 @@ public class JobManangerGUI {
 		});
 		
 		openItem.addSelectionListener(new SelectionListener() {
-			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				
 				JobController.jobController.readFile();
-				
 			}
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
 		});
 		
@@ -338,6 +327,5 @@ public class JobManangerGUI {
 	public void setTree(Tree m_tree) {
 		this.m_tree = m_tree;
 	}
-	
 	
 }
