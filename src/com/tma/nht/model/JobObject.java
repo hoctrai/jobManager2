@@ -91,6 +91,6 @@ public class JobObject {
 	}
 	
 	public String toString(){
-		return m_targetId+"\n" + m_id + "\n" + m_jobCategory + "\n" + m_jobType+ "\n"+ m_submit + "\n" + m_start + "\n" + m_timeout + "\n" + m_sever;
+		return "Target: "+m_targetId+"\n" +m_state[0] + "\n" + m_id + "\n" + "Categoryjob "+ m_jobCategory + ", job type " + m_jobType+ ", submit time" + m_submit + ", time start" + m_start + ", timeout " + m_timeout + ", server " + m_sever;
 	}
 }

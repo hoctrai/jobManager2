@@ -8,8 +8,11 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -92,12 +95,12 @@ public class JobManangerGUI {
 		/*--end--*/
 
 		/*--filter--*/
-		m_comboType.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				JobController.jobController.selectionChangeType(e);
-			}
-		});
+//		m_comboType.addSelectionListener(new SelectionAdapter() {
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				JobController.jobController.selectionChangeType(e);
+//			}
+//		});
 
 		m_comboValue.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -106,11 +109,13 @@ public class JobManangerGUI {
 			}
 		});
 		/*--end--*/
-		 m_table.addSelectionListener(new SelectionAdapter() {
-			 @Override
-				public void widgetSelected(SelectionEvent e) {
-					System.out.println(e.text);
-				}
+		 m_table.addListener(SWT.MouseDown, new Listener() {
+			
+			@Override
+			public void handleEvent(Event e) {
+				JobController.jobController.getId(e);
+					
+			}
 		});
 	}
 
@@ -143,7 +148,7 @@ public class JobManangerGUI {
 		grpRight.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		m_table = new Table(grpRight, SWT.BORDER | SWT.FULL_SELECTION);
-		GridData gd_table = new GridData(GridData.FILL_HORIZONTAL);
+		GridData gd_table = new GridData(GridData.FILL_BOTH);
 		gd_table.heightHint = 150;
 		m_table.setLayoutData(gd_table);
 		m_table.setHeaderVisible(true);
@@ -151,7 +156,7 @@ public class JobManangerGUI {
 		createColumnTable();
 		m_items = new LinkedList<>();
 		
-		m_txtDetail = new Text(grpRight, SWT.BORDER | SWT.MULTI);
+		m_txtDetail = new Text(grpRight, SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
 		m_txtDetail.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		
@@ -198,40 +203,53 @@ public class JobManangerGUI {
 		GridData gd_top = new GridData(GridData.FILL_HORIZONTAL);
 		gd_top.horizontalSpan = 2;
 		gd_top.widthHint = 827;
-		gd_top.heightHint = 39;
+		gd_top.heightHint = 52;
 		
 		Group top = new Group(m_parent, SWT.NONE);
-		GridLayout gl_top = new GridLayout(5, false);
-		gl_top.horizontalSpacing = 10;
+		GridLayout gl_top = new GridLayout(4, false);
+		gl_top.horizontalSpacing = 30;
 		top.setLayout(gl_top);
 		top.setLayoutData(gd_top);
 		top.setText("Filter");
 		
-		Label lblStyle = new Label(top,SWT.NONE);
-		lblStyle.setText("Style: ");
 		
-		GridData gd_comboType = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-		gd_comboType.widthHint = 103;
-		m_comboType = new Combo(top, SWT.NONE);
-		m_comboType.setLayoutData(gd_comboType);
-		String[] itemsType = {"Target:", "Catergoryjob:", "States:"};
-		m_comboType.setItems(itemsType);
+//		Label lblStyle = new Label(top,SWT.NONE);
+//		lblStyle.setText("Style: ");
+//		
+//		GridData gd_comboType = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+//		gd_comboType.widthHint = 103;
+//		m_comboType = new Combo(top, SWT.NONE);
+//		m_comboType.setLayoutData(gd_comboType);
+//		String[] itemsType = {"Target:", "Catergoryjob:", "States:"};
+//		m_comboType.setItems(itemsType);
 		
+		Button rdbTarget = new Button(top, SWT.RADIO);
+		rdbTarget.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+			}
+		});
+		rdbTarget.setText("Target");
 		
-		Label lblValue = new Label(top, SWT.NONE);
-		lblValue.setText("Value: ");
+		Button rdbCatergoryjob = new Button(top, SWT.RADIO);
+		rdbCatergoryjob.setText("Catergoryjob");
+		
+		Button rdbStates = new Button(top, SWT.RADIO);
+		rdbStates.setText("States");
+		new Label(top, SWT.NONE);
+		new Label(top, SWT.NONE);
+		new Label(top, SWT.NONE);
+		
+				
+				Label lblValue = new Label(top, SWT.NONE);
+				lblValue.setText("Value: ");
 		
 		GridData gd_comboValue = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_comboValue.widthHint = 103;
 		m_comboValue = new Combo(top, SWT.NONE);
 		m_comboValue.setLayoutData(gd_comboValue);
 		m_comboValue.setEnabled(false);
-		new Label(top, SWT.NONE);
-		new Label(top, SWT.NONE);
-		new Label(top, SWT.NONE);
-		new Label(top, SWT.NONE);
-		new Label(top, SWT.NONE);
-		new Label(top, SWT.NONE);
 	}
 	/*---end--*/
 	
@@ -327,5 +345,15 @@ public class JobManangerGUI {
 	public void setTree(Tree m_tree) {
 		this.m_tree = m_tree;
 	}
-	
+
+	public Text getTxtDetail() {
+		return m_txtDetail;
+	}
+
+	public void setTxtDetail(Text txtDetail) {
+		this.m_txtDetail = txtDetail;
+	}
+	public void setTxtDetail(String txtDetail) {
+		m_txtDetail.setText(txtDetail);
+	}
 }

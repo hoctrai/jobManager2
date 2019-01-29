@@ -1,6 +1,7 @@
 package com.tma.nht.model;
 
 public enum JobState {
+	All("All"),
 	Planned("Planned"),
 	WorkedPool("Worked Pool"),
 	Execution("Execution");

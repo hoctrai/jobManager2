@@ -9,6 +9,8 @@ import java.util.regex.Pattern;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.TableItem;
@@ -109,6 +111,20 @@ public class JobController {
 	
 	private void filterState(JobState state) {
 		m_jobGui.getTree().removeAll();
+		
+		
+		if(state.getState().equals("All")){
+			JobState[] States = {state.Planned, state.WorkedPool, state.Execution};
+			for(int i = 0; i < 3; i++){
+				updateTree(States[i]);
+			}
+		}
+		else{
+			updateTree(state);
+		}
+	}
+
+	private void updateTree(JobState state) {
 		String target="-1";
 		TreeItem itemState = new TreeItem(m_jobGui.getTree(), SWT.NONE);
 		itemState.setText(state.getState());
@@ -121,6 +137,7 @@ public class JobController {
 			
 			}
 		}
+		
 	}
 
 	/*--open File (Menu) --*/
@@ -148,6 +165,7 @@ public class JobController {
 		String target = "-1";
 		for(int i = 0; i < m_jobs.size(); i++){
 			int j = checkCategory(m_jobs.get(i).getJobCategory());
+			
 			if (i == 0 || j == -1) {
 				TreeItem item = new TreeItem(m_jobGui.getTree(), SWT.NONE);
 				item.setText(m_jobs.get(i).getJobCategory());
@@ -170,6 +188,34 @@ public class JobController {
 				"Confirmation", "Do you want to exit")){
 			System.exit(0);
 		}
+	}
+
+	/*--select TableItem--*/
+	public void getId(Event e) {
+		Point pt = new Point(e.x, e.y);
+		TableItem item = m_jobGui.getTable().getItem(pt);
+		if(item == null)
+			return;
+		
+		for(int i = 0; i< m_jobGui.getTable().getColumnCount(); i++){
+			Rectangle rect = item.getBounds(i);
+			
+			if(rect.contains(pt)){
+				//int index = m_jobGui.getTable().indexOf(item);
+				long idJob = Long.parseLong(item.getText(0));
+				search(idJob);
+			}
+		}
+	}
+
+	private void search(long idJob) {
+		for(int i = 0; i < m_jobs.size(); i++){
+			if(idJob == m_jobs.get(i).getId()){
+				m_jobGui.setTxtDetail(m_jobs.get(i).toString());
+				break;
+			}
+		}
+		
 	}
 	
 	
