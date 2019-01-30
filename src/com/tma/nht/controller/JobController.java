@@ -1,6 +1,7 @@
 package com.tma.nht.controller;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -11,6 +12,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.TableItem;
@@ -27,6 +30,8 @@ public class JobController {
 	private JobManangerGUI m_jobGui;
 
 	private List<JobObject> m_jobs;
+
+	private String[] categoryjobs;
 	
 	public void setJobManager(JobManangerGUI jobManangerGUI) {
 		m_jobGui = jobManangerGUI;
@@ -37,7 +42,7 @@ public class JobController {
 	}
 	
 	/*--select Targer(Viewer)--*/
-	public void selectionChange(Event e) {
+	public void selectionChange(SelectionEvent e) {
 		String strTarget = ((TreeItem) e.item).getText();
 		updateTable();
 		getJobs(strTarget);
@@ -80,16 +85,28 @@ public class JobController {
 	}
 
 	/*--- selection Type (Filter)--*/
-	public void selectionChangeType(SelectionEvent e) {
-		if (m_jobGui.getComboType().getText().equalsIgnoreCase("States:")) {
+	public void selectionChangeType(String str) {
+		if(str.equalsIgnoreCase("States")){
 			String[] itemStatetes = { "All", "Planned", "Worked Pool", "Execution" };
 			m_jobGui.getComboValue().setItems(itemStatetes);
 			m_jobGui.getComboValue().setEnabled(true);
-		} else if (m_jobGui.getComboType().getText().equalsIgnoreCase("Catergoryjob:")) {
+		}
+		else if(str.equalsIgnoreCase("Catergoryjob")){
 			m_jobGui.getTree().removeAll();
-			updateTreeCategory();
-		} else {
-
+			List <String> categorys = new LinkedList<String>();
+ 			updateTreeCategory(categorys);
+			
+			
+			m_jobGui.getComboValue().setItems((String[]) categoryjobs);
+			m_jobGui.getComboValue().setEnabled(true);
+			
+		}else{
+			try{
+				m_jobGui.getTree().removeAll();
+				updateTree();
+			}catch(Exception ex){
+				
+			}
 		}
 	}
 
@@ -128,8 +145,8 @@ public class JobController {
 		String target="-1";
 		TreeItem itemState = new TreeItem(m_jobGui.getTree(), SWT.NONE);
 		itemState.setText(state.getState());
+		
 		for(int i = 0; i < m_jobs.size(); i++){
-			
 			if(m_jobs.get(i).getState()[0].equalsIgnoreCase(state.getState())){
 			target = "Target: "+m_jobs.get(i).getTargetId();
 			TreeItem item = new TreeItem(itemState, SWT.NONE);
@@ -137,7 +154,6 @@ public class JobController {
 			
 			}
 		}
-		
 	}
 
 	/*--open File (Menu) --*/
@@ -146,8 +162,13 @@ public class JobController {
 		String path = dialog.open();
 		FOA foa = new FOA(path);
 		m_jobs = foa.getJobs();
+		//MessageDialog.openConfirm(m_jobGui.getParent().getShell(), "loadFile", "GUI is loading File!!");
+		m_jobGui.getTree().removeAll();
+		categoryjobs = (String[]) foa.getCategoryjob().toArray(new String[foa.getCategoryjob().size()]); 
 		updateTree();
 	}
+	
+	/*--update treeView--*/
 	public void updateTree(){
 		String target="-1";
 		for(int i = 0; i < m_jobs.size(); i++){
@@ -158,17 +179,19 @@ public class JobController {
 				item.setText("Target: "+target);
 			}
 		}
-		
 	}
 	
-	public void updateTreeCategory(){
+	public void updateTreeCategory(List<String> categorys){
 		String target = "-1";
+		int k = 0;
 		for(int i = 0; i < m_jobs.size(); i++){
+			System.out.println(i);
 			int j = checkCategory(m_jobs.get(i).getJobCategory());
 			
 			if (i == 0 || j == -1) {
+				String category = m_jobs.get(i).getJobCategory();
 				TreeItem item = new TreeItem(m_jobGui.getTree(), SWT.NONE);
-				item.setText(m_jobs.get(i).getJobCategory());
+				item.setText(category);
 				
 				target = "" + m_jobs.get(i).getTargetId();
 				TreeItem item1 = new TreeItem(item, SWT.NONE);
@@ -180,7 +203,6 @@ public class JobController {
 				item.setText("Target: " + target);
 			}
 		}
-		
 	}
 
 	public void exit() {
@@ -215,8 +237,5 @@ public class JobController {
 				break;
 			}
 		}
-		
 	}
-	
-	
 }

@@ -27,35 +27,38 @@ public class FOA<T extends JobObject> {
 	
 	private List<T> m_jobs;
 	private List<String> m_strTargets;
+	private List<String> categoryjob;
 	
 	public FOA(String path){
 		m_jobs = new LinkedList<>();
 		m_strTargets = new LinkedList<>();
+		categoryjob = new LinkedList<>();
 		
 		readFile(path);
 	}
 	
 	private void readFile(String path) {
 		String line;
-		FileInputStream in;
-		BufferedReader inp;
+		BufferedReader inp = null;
 		try {
-			in = new FileInputStream(path);
-			inp = new BufferedReader(new InputStreamReader(in));
+			inp = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
 			
-			try {
-				while((line = inp.readLine())!=null){
-					getJob(line, inp,m_jobs);
-					
-				}
-				in.close();
-				inp.close();
-			} catch (IOException e) {
-				
+			while ((line = inp.readLine()) != null) {
+				getJob(line, inp, m_jobs);
 			}
-			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+			//Show friendly log by using dialog
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if(inp != null){
+				try {
+					inp.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		
 		Collections.sort(m_jobs, new Comparator<T>() {
@@ -119,6 +122,10 @@ public class FOA<T extends JobObject> {
 		String type = strChild[2];
 		String category = strChild[1].split(" ")[2];
 		
+		if(!categoryjob.contains(category)){
+			categoryjob.add(category);
+		}
+		
 		String submit = "", start = "", timeout = "", server = "";
 		for(int k = 1; k < strParent.length; k++){
 			Optional<String> opt = Optional.ofNullable(strParent[k]);
@@ -148,6 +155,13 @@ public class FOA<T extends JobObject> {
 	}
 	public void setStrTargets(List<String> strTargets) {
 		this.m_strTargets = strTargets;
+	}
+
+	public List<String> getCategoryjob() {
+		return categoryjob;
+	}
+	public void setCategoryjob(List<String> categoryjob) {
+		this.categoryjob = categoryjob;
 	}
 	
 	

@@ -3,13 +3,8 @@ package com.tma.nht.view;
 import java.util.LinkedList;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -18,7 +13,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -30,6 +24,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 
 import com.tma.nht.controller.JobController;
+import com.tma.nht.controller.JobSelectionAdapter;
 
 public class JobManangerGUI {
 	
@@ -41,16 +36,22 @@ public class JobManangerGUI {
 	private Table m_table;
 	private LinkedList<TableItem> m_items;
 	private Tree m_tree;
-	private TableItem m_item;
 	
 	
 	private Text m_txtDetail;
+	private Button rdbTarget;
+	private Button rdbCatergoryjob;
+	private Button rdbStates;
 
-	public static void main(String[] args) {
-		JobManangerGUI gui = new JobManangerGUI();
+	public static void init(){
+		new JobManangerGUI();
 	}
 	
-	public JobManangerGUI() {
+	public static void main(String[] args) {
+		JobManangerGUI.init();
+	}
+	
+	private JobManangerGUI() {
 		
 		Display display = new Display();
 		Shell shell = new Shell(display);
@@ -76,50 +77,53 @@ public class JobManangerGUI {
 		
 	}
 
+	/*--create Menu---*/
+	private void initMenu(Shell shell){
+		m_menu = new Menu(shell,SWT.BAR);
+		
+		final MenuItem file = new MenuItem(m_menu, SWT.CASCADE);
+		file.setText("&File");
+		
+		final Menu fileMenu = new Menu(shell, SWT.DROP_DOWN);
+		file.setMenu(fileMenu);
+		
+		final MenuItem openItem = new MenuItem(fileMenu, SWT.PUSH);
+		openItem.setText("Open");
+		
+		final MenuItem exitItem = new MenuItem(fileMenu, SWT.PUSH);
+		exitItem.setText("Exit");
+
+		exitItem.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				JobController.jobController.exit();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+		
+		openItem.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				JobController.jobController.readFile();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+		shell.setMenuBar(m_menu);
+	}
+	/*---end--*/
+	
 	private void initial(Shell shell) {
 		initTop();
 		initBottom();
 		addListeners();
 	}
 	
-	/*---call event ---*/
-	private void addListeners() {
-		/*--TreeViewer--*/
-		m_tree.addListener(SWT.Selection, new Listener() {
-
-			@Override
-			public void handleEvent(Event e) {
-				JobController.jobController.selectionChange(e);
-			}
-		});
-		/*--end--*/
-
-		/*--filter--*/
-//		m_comboType.addSelectionListener(new SelectionAdapter() {
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				JobController.jobController.selectionChangeType(e);
-//			}
-//		});
-
-		m_comboValue.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				JobController.jobController.selectionChangeValue(e);
-			}
-		});
-		/*--end--*/
-		 m_table.addListener(SWT.MouseDown, new Listener() {
-			
-			@Override
-			public void handleEvent(Event e) {
-				JobController.jobController.getId(e);
-					
-			}
-		});
-	}
-
-
 	private void initBottom() {
 		Composite bottom = new Composite(m_parent, SWT.NONE);
 		bottom.setLayout(new GridLayout(2,false));
@@ -138,10 +142,6 @@ public class JobManangerGUI {
 		gd_treeView.widthHint=150;
 		m_tree.setLayoutData(gd_treeView);
 		
-		
-		
-		
-		
 		Group grpRight = new Group(bottom, SWT.NONE);
 		grpRight.setText("Description");
 		grpRight.setLayout(new GridLayout(1, false));
@@ -153,16 +153,7 @@ public class JobManangerGUI {
 		m_table.setLayoutData(gd_table);
 		m_table.setHeaderVisible(true);
 		m_table.setLinesVisible(true);
-		createColumnTable();
-		m_items = new LinkedList<>();
-		
-		m_txtDetail = new Text(grpRight, SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
-		m_txtDetail.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
-		
-	}
-	
-	private void createColumnTable() {
+		//Table
 		TableColumn columnIdJob = new TableColumn(m_table, SWT.CENTER);
 		columnIdJob.setWidth(120);
 		columnIdJob.setText("Id Job");
@@ -190,60 +181,36 @@ public class JobManangerGUI {
 		TableColumn columnServer = new TableColumn(m_table, SWT.CENTER);
 		columnServer.setWidth(150);
 		columnServer.setText("Server");
+		m_items = new LinkedList<>();
+		
+		m_txtDetail = new Text(grpRight, SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
+		m_txtDetail.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 	}
-
-	public TableItem createItemTable() {
-		return new TableItem(m_table, SWT.NONE);
-		
-	}
-
-	/*---get Filter---*/
+	
 	private void initTop() {
 		GridData gd_top = new GridData(GridData.FILL_HORIZONTAL);
 		gd_top.horizontalSpan = 2;
 		gd_top.widthHint = 827;
-		gd_top.heightHint = 52;
+		gd_top.heightHint = 43;
 		
 		Group top = new Group(m_parent, SWT.NONE);
-		GridLayout gl_top = new GridLayout(4, false);
+		GridLayout gl_top = new GridLayout(5, false);
 		gl_top.horizontalSpacing = 30;
 		top.setLayout(gl_top);
 		top.setLayoutData(gd_top);
 		top.setText("Filter");
 		
-		
-//		Label lblStyle = new Label(top,SWT.NONE);
-//		lblStyle.setText("Style: ");
-//		
-//		GridData gd_comboType = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-//		gd_comboType.widthHint = 103;
-//		m_comboType = new Combo(top, SWT.NONE);
-//		m_comboType.setLayoutData(gd_comboType);
-//		String[] itemsType = {"Target:", "Catergoryjob:", "States:"};
-//		m_comboType.setItems(itemsType);
-		
-		Button rdbTarget = new Button(top, SWT.RADIO);
-		rdbTarget.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				
-			}
-		});
+		rdbTarget = new Button(top, SWT.RADIO);
 		rdbTarget.setText("Target");
 		
-		Button rdbCatergoryjob = new Button(top, SWT.RADIO);
+		rdbCatergoryjob = new Button(top, SWT.RADIO);
 		rdbCatergoryjob.setText("Catergoryjob");
 		
-		Button rdbStates = new Button(top, SWT.RADIO);
+		rdbStates = new Button(top, SWT.RADIO);
 		rdbStates.setText("States");
-		new Label(top, SWT.NONE);
-		new Label(top, SWT.NONE);
-		new Label(top, SWT.NONE);
-		
-				
-				Label lblValue = new Label(top, SWT.NONE);
-				lblValue.setText("Value: ");
+//		Label lblValue = new Label(top, SWT.NONE);
+//		lblValue.setText("Value: ");
 		
 		GridData gd_comboValue = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_comboValue.widthHint = 103;
@@ -251,28 +218,22 @@ public class JobManangerGUI {
 		m_comboValue.setLayoutData(gd_comboValue);
 		m_comboValue.setEnabled(false);
 	}
-	/*---end--*/
 	
-	/*--create Menu---*/
-	private void initMenu(Shell shell){
-		m_menu = new Menu(shell,SWT.BAR);
-		
-		final MenuItem file = new MenuItem(m_menu, SWT.CASCADE);
-		file.setText("&File");
-		
-		final Menu fileMenu = new Menu(shell, SWT.DROP_DOWN);
-		file.setMenu(fileMenu);
-		
-		final MenuItem openItem = new MenuItem(fileMenu, SWT.PUSH);
-		openItem.setText("Open");
-		
-		final MenuItem exitItem = new MenuItem(fileMenu, SWT.PUSH);
-		exitItem.setText("Exit");
-
-		exitItem.addSelectionListener(new SelectionListener() {
+	private void addListeners() {
+		/*--TreeViewer--*/
+//		m_tree.addListener(SWT.Selection, new Listener() {
+//
+//			@Override
+//			public void handleEvent(Event e) {
+//				JobController.jobController.selectionChange(e);
+//			}
+//		});
+		m_tree.addSelectionListener(new SelectionListener() {
+			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				JobController.jobController.exit();
+				JobController.jobController.selectionChange(e);
+				
 			}
 			
 			@Override
@@ -281,23 +242,30 @@ public class JobManangerGUI {
 				
 			}
 		});
+		/*--end--*/
+
+		/*--filter--*/
+		rdbStates.addSelectionListener(new JobSelectionAdapter());
+		rdbTarget.addSelectionListener(new JobSelectionAdapter());
+		rdbCatergoryjob.addSelectionListener(new JobSelectionAdapter());
+		m_comboValue.addSelectionListener(new JobSelectionAdapter());
 		
-		openItem.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				JobController.jobController.readFile();
-			}
+		/*--end--*/
+		 m_table.addListener(SWT.MouseDown, new Listener() {
 			
 			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
+			public void handleEvent(Event e) {
+				JobController.jobController.getId(e);
+					
 			}
 		});
-		
-		
-		shell.setMenuBar(m_menu);
 	}
-	/*---end--*/
 
+	public TableItem createItemTable() {
+		return new TableItem(m_table, SWT.NONE);
+	}	
+	
+	/*-- get-set method --*/
 	public Composite getParent(){
 		return m_parent;
 		
