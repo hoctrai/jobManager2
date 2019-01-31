@@ -18,13 +18,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import com.tma.nht.model.JobObject;
+import com.tma.nht.resource.JobResource;
 
 /*File object access*/ 
 public class FOA<T extends JobObject> {
-	private static final String TARGET_KEY="Target: ";
-	private static final String STATES_KEY="Planned, Ongoing, Started";
-	private static final String DATA_KEY="submitTime";
-	
 	private List<T> m_jobs;
 	private List<String> m_strTargets;
 	private List<String> categoryjob;
@@ -78,14 +75,14 @@ public class FOA<T extends JobObject> {
 			Document doc = Jsoup.parse(line,"UTF-8");
 			String strTitle = doc.text();
 			
-			if(strTitle.contains(TARGET_KEY)){
+			if(strTitle.contains(JobResource.TARGET_KEY)){
 				Pattern p = Pattern.compile("-?\\d+");
 				Matcher m = p.matcher(strTitle);
 				if(m.find())
 					targetId = Integer.parseInt(m.group());
 				
 			}
-			else if((STATES_KEY).contains(strTitle)){
+			else if((JobResource.STATES_KEY).contains(strTitle)){
 				if(strTitle.equalsIgnoreCase("ongoing"))
 					status = "Worked Pool";
 				else if(strTitle.equalsIgnoreCase("started"))
@@ -94,7 +91,7 @@ public class FOA<T extends JobObject> {
 					status = strTitle;
 				
 			}
-			else if(strTitle.contains(DATA_KEY)&&status!=""){
+			else if(strTitle.contains(JobResource.DATA_KEY)&&status!=""){
 				data = strTitle;
 				String[] state = {status,data};
 				T job = dissectStrData(data);

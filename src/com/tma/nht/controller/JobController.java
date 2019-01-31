@@ -8,19 +8,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.tma.nht.model.JobObject;
 import com.tma.nht.model.JobState;
+import com.tma.nht.resource.JobResource;
 import com.tma.nht.view.JobManangerGUI;
 
 public class JobController {
@@ -120,40 +121,50 @@ public class JobController {
 	}
 
 	/*--select Value (Filter)--*/
-	public void selectionChangeValue(SelectionEvent e) {
-		String strValue = m_jobGui.getComboValue().getText().replace(" ","");
-		JobState state =JobState.valueOf(strValue.trim());
-		filterState(state);
+	public void selectionChangeValue(String strValue) {
+		if(JobResource.STATE_COMBO_VALUE.contains(strValue)){
+			JobState state =JobState.valueOf(strValue.trim());
+			filterState(state);
+			
+		}
+		else{
+			filterCategory(strValue);
+		}
 	}
 	
+	private void filterCategory(String strValue) {
+		m_jobGui.getTree().removeAll();
+		updateTree(strValue);
+	}
+
 	private void filterState(JobState state) {
 		m_jobGui.getTree().removeAll();
-		
 		
 		if(state.getState().equals("All")){
 			JobState[] States = {state.Planned, state.WorkedPool, state.Execution};
 			for(int i = 0; i < 3; i++){
-				updateTree(States[i]);
+				updateTree(States[i].getState());
 			}
 		}
 		else{
-			updateTree(state);
+			updateTree(state.getState());
 		}
 	}
 
-	private void updateTree(JobState state) {
+	private void updateTree(String str) {
 		String target="-1";
-		TreeItem itemState = new TreeItem(m_jobGui.getTree(), SWT.NONE);
-		itemState.setText(state.getState());
+		TreeItem treeState = new TreeItem(m_jobGui.getTree(), SWT.NONE);
+		treeState.setText(str);
 		
 		for(int i = 0; i < m_jobs.size(); i++){
-			if(m_jobs.get(i).getState()[0].equalsIgnoreCase(state.getState())){
-			target = "Target: "+m_jobs.get(i).getTargetId();
-			TreeItem item = new TreeItem(itemState, SWT.NONE);
-			item.setText(target);
+			if(m_jobs.get(i).getState()[0].equalsIgnoreCase(str)||m_jobs.get(i).getJobCategory().equalsIgnoreCase(str)){
+				target = "Target: " + m_jobs.get(i).getTargetId();
+				TreeItem item = new TreeItem(treeState, SWT.NONE);
+				item.setText(target);
 			
 			}
 		}
+		
 	}
 
 	/*--open File (Menu) --*/
@@ -162,7 +173,7 @@ public class JobController {
 		String path = dialog.open();
 		FOA foa = new FOA(path);
 		m_jobs = foa.getJobs();
-		//MessageDialog.openConfirm(m_jobGui.getParent().getShell(), "loadFile", "GUI is loading File!!");
+		//ProgressBar progressBar = new ProgressBar(m_jobGui.getParent().getShell(), SWT.NONE);
 		m_jobGui.getTree().removeAll();
 		categoryjobs = (String[]) foa.getCategoryjob().toArray(new String[foa.getCategoryjob().size()]); 
 		updateTree();
