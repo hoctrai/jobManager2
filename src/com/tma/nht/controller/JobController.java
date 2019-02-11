@@ -8,14 +8,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.ProgressBar;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.TreeItem;
 
@@ -106,7 +105,7 @@ public class JobController {
 				m_jobGui.getTree().removeAll();
 				updateTree();
 			}catch(Exception ex){
-				
+				//new LogDialog(ex.getMessage());
 			}
 		}
 	}
@@ -164,7 +163,6 @@ public class JobController {
 			
 			}
 		}
-		
 	}
 
 	/*--open File (Menu) --*/
@@ -173,7 +171,18 @@ public class JobController {
 		String path = dialog.open();
 		FOA foa = new FOA(path);
 		m_jobs = foa.getJobs();
-		//ProgressBar progressBar = new ProgressBar(m_jobGui.getParent().getShell(), SWT.NONE);
+		/*
+		 *  progressBar
+		 */
+		
+		Label labelInfo = new Label(m_jobGui.getParent().getShell(), SWT.NONE);
+        labelInfo.setBounds(10, 46, 350, 15);
+        labelInfo.setText(" ...");
+        
+        /*
+         * end progressbar
+         */
+        
 		m_jobGui.getTree().removeAll();
 		categoryjobs = (String[]) foa.getCategoryjob().toArray(new String[foa.getCategoryjob().size()]); 
 		updateTree();

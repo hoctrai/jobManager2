@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -14,11 +13,14 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.ProgressMonitorInputStream;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import com.tma.nht.model.JobObject;
 import com.tma.nht.resource.JobResource;
+import com.tma.nht.view.LogDialog;
 
 /*File object access*/ 
 public class FOA<T extends JobObject> {
@@ -38,21 +40,25 @@ public class FOA<T extends JobObject> {
 		String line;
 		BufferedReader inp = null;
 		try {
-			inp = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
+			inp = new BufferedReader(new InputStreamReader(new ProgressMonitorInputStream(null, "loading file!!",new FileInputStream(path))));
 			
 			while ((line = inp.readLine()) != null) {
 				getJob(line, inp, m_jobs);
 			}
 		} catch (FileNotFoundException e) {
+			new LogDialog(e.getMessage());
 			e.printStackTrace();
+			
 			//Show friendly log by using dialog
 		} catch (IOException e) {
+			new LogDialog(e.getMessage());
 			e.printStackTrace();
 		} finally {
 			if(inp != null){
 				try {
 					inp.close();
 				} catch (IOException e) {
+					new LogDialog(e.getMessage());
 					e.printStackTrace();
 				}
 			}
@@ -105,6 +111,7 @@ public class FOA<T extends JobObject> {
 			try {
 				line = inp.readLine();
 			} catch (IOException e) {
+				new LogDialog(e.getMessage());
 				e.printStackTrace();
 			}
 		}

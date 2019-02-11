@@ -43,6 +43,7 @@ public class JobManangerGUI {
 	private Button rdbCatergoryjob;
 	private Button rdbStates;
 
+
 	public static void init(){
 		new JobManangerGUI();
 	}
@@ -67,6 +68,7 @@ public class JobManangerGUI {
 		initial(shell);
 		
 		JobController.jobController.setJobManager(this);
+		LogDialog.logDialog.setJobManager(this);
 		
 		shell.open();
 		while (!shell.isDisposed()) {
@@ -309,19 +311,18 @@ public class JobManangerGUI {
 	public Tree getTree() {
 		return m_tree;
 	}
-
 	public void setTree(Tree m_tree) {
 		this.m_tree = m_tree;
 	}
-
+	
 	public Text getTxtDetail() {
 		return m_txtDetail;
 	}
-
 	public void setTxtDetail(Text txtDetail) {
 		this.m_txtDetail = txtDetail;
 	}
 	public void setTxtDetail(String txtDetail) {
 		m_txtDetail.setText(txtDetail);
 	}
+	
 }
