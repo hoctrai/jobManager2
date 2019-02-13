@@ -68,7 +68,6 @@ public class JobManangerGUI {
 		initial(shell);
 		
 		JobController.jobController.setJobManager(this);
-		LogDialog.logDialog.setJobManager(this);
 		
 		shell.open();
 		while (!shell.isDisposed()) {

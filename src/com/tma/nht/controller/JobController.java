@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,6 +23,7 @@ import com.tma.nht.model.JobObject;
 import com.tma.nht.model.JobState;
 import com.tma.nht.resource.JobResource;
 import com.tma.nht.view.JobManangerGUI;
+import com.tma.nht.view.LogDialog;
 
 public class JobController {
 	public static final JobController jobController = new JobController();
@@ -95,7 +97,6 @@ public class JobController {
 			m_jobGui.getTree().removeAll();
 			List <String> categorys = new LinkedList<String>();
  			updateTreeCategory(categorys);
-			
 			
 			m_jobGui.getComboValue().setItems((String[]) categoryjobs);
 			m_jobGui.getComboValue().setEnabled(true);
@@ -185,6 +186,14 @@ public class JobController {
         
 		m_jobGui.getTree().removeAll();
 		categoryjobs = (String[]) foa.getCategoryjob().toArray(new String[foa.getCategoryjob().size()]); 
+		LogDialog it = new LogDialog();
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				it.createAndShowGUI(it);
+			}
+		});
 		updateTree();
 	}
 	
@@ -203,7 +212,6 @@ public class JobController {
 	
 	public void updateTreeCategory(List<String> categorys){
 		String target = "-1";
-		int k = 0;
 		for(int i = 0; i < m_jobs.size(); i++){
 			System.out.println(i);
 			int j = checkCategory(m_jobs.get(i).getJobCategory());
