@@ -97,7 +97,7 @@ PropertyChangeListener{
 	        @Override
 	        public void done() {
 	            Toolkit.getDefaultToolkit().beep();
-	            startButton.setEnabled(true);
+//	            startButton.setEnabled(true);
 	            progressMonitor.setProgress(0);
 	        }
 	    }
@@ -106,33 +106,33 @@ PropertyChangeListener{
 	        super(new BorderLayout());
 	 
 	        //Create the demo's UI.
-	        startButton = new JButton("Start");
-	        startButton.setActionCommand("start");
-	        startButton.addActionListener(this);
-	 
-	        taskOutput = new JTextArea(5, 20);
-	        taskOutput.setMargin(new Insets(5,5,5,5));
-	        taskOutput.setEditable(false);
-	 
-	        add(startButton, BorderLayout.PAGE_START);
-	        add(new JScrollPane(taskOutput), BorderLayout.CENTER);
-	        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+//	        startButton = new JButton("Start");
+//	        startButton.setActionCommand("start");
+//	        startButton.addActionListener(this);
+//	 
+//	        taskOutput = new JTextArea(5, 20);
+//	        taskOutput.setMargin(new Insets(5,5,5,5));
+//	        taskOutput.setEditable(false);
+//	 
+//	        add(startButton, BorderLayout.PAGE_START);
+//	        add(new JScrollPane(taskOutput), BorderLayout.CENTER);
+//	        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+	        progressMonitor = new ProgressMonitor(LogDialog.this,
+                    "Running a Long Task",
+                    "", 0, 100);
+			progressMonitor.setProgress(0);
+			task = new Task();
+			task.addPropertyChangeListener(this);
+			task.execute();
 	 
 	    }
-	 
 	 
 	    /**
 	     * Invoked when the user presses the start button.
 	     */
 	    public void actionPerformed(ActionEvent evt) {
-	        progressMonitor = new ProgressMonitor(LogDialog.this,
-	                                  "Running a Long Task",
-	                                  "", 0, 100);
-	        progressMonitor.setProgress(0);
-	        task = new Task();
-	        task.addPropertyChangeListener(this);
-	        task.execute();
-	        startButton.setEnabled(false);
+	        
+//	        startButton.setEnabled(false);
 	    }
 	 
 	    /**
@@ -145,17 +145,17 @@ PropertyChangeListener{
 	            String message =
 	                String.format("Completed %d%%.\n", progress);
 	            progressMonitor.setNote(message);
-	            taskOutput.append(message);
-	            if (progressMonitor.isCanceled() || task.isDone()) {
-	                Toolkit.getDefaultToolkit().beep();
-	                if (progressMonitor.isCanceled()) {
-	                    task.cancel(true);
-	                    taskOutput.append("Task canceled.\n");
-	                } else {
-	                    taskOutput.append("Task completed.\n");
-	                }
-	                startButton.setEnabled(true);
-	            }
+	            //taskOutput.append(message);
+//	            if (progressMonitor.isCanceled() || task.isDone()) {
+//	                Toolkit.getDefaultToolkit().beep();
+//	                if (progressMonitor.isCanceled()) {
+//	                    task.cancel(true);
+//	                    taskOutput.append("Task canceled.\n");
+//	                } else {
+//	                    taskOutput.append("Task completed.\n");
+//	                }
+//	                startButton.setEnabled(true);
+//	            }
 	        }
 	 
 	    }
