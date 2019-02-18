@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -16,6 +17,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -53,11 +55,24 @@ public class JobManangerGUI {
 	}
 	
 	private JobManangerGUI() {
-		
 		Display display = new Display();
 		Shell shell = new Shell(display);
 		shell.setSize(1066, 540);
 		shell.setLayout(new GridLayout(1, false));
+		
+		/** take the primary monitor */
+		Monitor primary = display.getPrimaryMonitor();
+		Rectangle bounds = primary.getBounds();
+		
+		/** get the size of the window */
+	    Rectangle rect = shell.getBounds();
+	    
+		  /** calculate the centre */
+	    int x = bounds.x + (bounds.width - rect.width) / 2;
+	    int y = bounds.y + (bounds.height - rect.height) / 2;
+
+	    /** set the new location */
+	    shell.setLocation(x, y);
 		
 		initMenu(shell);
 		
@@ -210,25 +225,15 @@ public class JobManangerGUI {
 		
 		rdbStates = new Button(top, SWT.RADIO);
 		rdbStates.setText("States");
-//		Label lblValue = new Label(top, SWT.NONE);
-//		lblValue.setText("Value: ");
 		
 		GridData gd_comboValue = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_comboValue.widthHint = 103;
 		m_comboValue = new Combo(top, SWT.NONE);
 		m_comboValue.setLayoutData(gd_comboValue);
-		m_comboValue.setEnabled(false);
+		m_comboValue.setEnabled(true);
 	}
 	
 	private void addListeners() {
-		/*--TreeViewer--*/
-//		m_tree.addListener(SWT.Selection, new Listener() {
-//
-//			@Override
-//			public void handleEvent(Event e) {
-//				JobController.jobController.selectionChange(e);
-//			}
-//		});
 		m_tree.addSelectionListener(new SelectionListener() {
 			
 			@Override

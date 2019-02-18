@@ -40,8 +40,8 @@ public class FOA<T extends JobObject> {
 		String line;
 		BufferedReader inp = null;
 		try {
-			inp = new BufferedReader(new InputStreamReader(new ProgressMonitorInputStream(null, "loading file!!",new FileInputStream(path))));
-			
+			//inp = new BufferedReader(new InputStreamReader(/*new ProgressMonitorInputStream*/(null, "loading file!!",new FileInputStream(path))));
+			inp = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
 			while ((line = inp.readLine()) != null) {
 				getJob(line, inp, m_jobs);
 			}
@@ -105,8 +105,8 @@ public class FOA<T extends JobObject> {
 				job.setState(state);
 				job.toString();
 				jobs.add(job);
-				
-				m_strTargets.add("Target: " +targetId);
+				if(m_strTargets.size() == 0 || !m_strTargets.get(m_strTargets.size()-1).equals(targetId+""))
+					m_strTargets.add("" +targetId);
 			}
 			try {
 				line = inp.readLine();

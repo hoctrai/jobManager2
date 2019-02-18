@@ -1,10 +1,10 @@
 package com.tma.nht.controller;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,7 +15,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.TreeItem;
 
@@ -34,6 +33,7 @@ public class JobController {
 	private List<JobObject> m_jobs;
 
 	private String[] categoryjobs;
+	private String[] targets;
 	
 	public void setJobManager(JobManangerGUI jobManangerGUI) {
 		m_jobGui = jobManangerGUI;
@@ -104,6 +104,10 @@ public class JobController {
 		}else{
 			try{
 				m_jobGui.getTree().removeAll();
+				m_jobGui.getComboValue().setItems((String[]) targets);
+				
+				
+				
 				updateTree();
 			}catch(Exception ex){
 				//new LogDialog(ex.getMessage());
@@ -122,13 +126,23 @@ public class JobController {
 
 	/*--select Value (Filter)--*/
 	public void selectionChangeValue(String strValue) {
+		int iValue;
 		if(JobResource.STATE_COMBO_VALUE.contains(strValue)){
 			JobState state =JobState.valueOf(strValue.trim());
 			filterState(state);
 			
 		}
-		else{
-			filterCategory(strValue);
+		
+		else {
+			try {
+				getJobs(strValue);
+				
+				
+			} catch (Exception e) {
+				// TODO: handle exception
+				filterCategory(strValue);
+			}
+			
 		}
 	}
 	
@@ -170,35 +184,41 @@ public class JobController {
 	public void readFile(){
 		FileDialog dialog = new FileDialog(m_jobGui.getParent().getShell());
 		String path = dialog.open();
+		File file = new File(path);
+		 int index = (int) (file.length()/2580000);
+         int index2 = 100/index;
+		
 		FOA foa = new FOA(path);
 		m_jobs = foa.getJobs();
+		
 		/*
 		 *  progressBar
 		 */
 		
-		Label labelInfo = new Label(m_jobGui.getParent().getShell(), SWT.NONE);
-        labelInfo.setBounds(10, 46, 350, 15);
-        labelInfo.setText(" ...");
-        
-        /*
-         * end progressbar
-         */
-        
 		m_jobGui.getTree().removeAll();
 		categoryjobs = (String[]) foa.getCategoryjob().toArray(new String[foa.getCategoryjob().size()]); 
-		LogDialog it = new LogDialog();
+		targets = (String[]) foa.getStrTargets().toArray(new String[foa.getStrTargets().size()]);
+		
+		LogDialog logDialog = new LogDialog();
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			
 			@Override
 			public void run() {
-				it.createAndShowGUI(it);
+				logDialog.createAndShowProgress(logDialog, index2);
 			}
 		});
 		updateTree();
+		
+        /*
+         * end progressbar
+         */
+        
+		
 	}
 	
 	/*--update treeView--*/
 	public void updateTree(){
+		
 		String target="-1";
 		for(int i = 0; i < m_jobs.size(); i++){
 				if(Integer.parseInt(target) != (m_jobs.get(i).getTargetId())){
@@ -213,7 +233,6 @@ public class JobController {
 	public void updateTreeCategory(List<String> categorys){
 		String target = "-1";
 		for(int i = 0; i < m_jobs.size(); i++){
-			System.out.println(i);
 			int j = checkCategory(m_jobs.get(i).getJobCategory());
 			
 			if (i == 0 || j == -1) {
@@ -233,6 +252,28 @@ public class JobController {
 		}
 	}
 
+//	public void updateTreeCategory(List<String> categorys){
+//		String target = "-1";
+//		for(int i = 0; i < m_jobs.size(); i++){
+//			int j = checkCategory(m_jobs.get(i).getJobCategory());
+//			
+//			if (i == 0 || j == -1) {
+//				String category = m_jobs.get(i).getJobCategory();
+//				TreeItem item = new TreeItem(m_jobGui.getTree(), SWT.NONE);
+//				item.setText(category);
+//				
+//				target = "" + m_jobs.get(i).getTargetId();
+//				TreeItem item1 = new TreeItem(item, SWT.NONE);
+//				item1.setText("Target: " + target);
+//				
+//			} else if(Integer.parseInt(target) != (m_jobs.get(i).getTargetId())){
+//				target = ""+m_jobs.get(i).getTargetId();
+//				TreeItem item = new TreeItem(m_jobGui.getTree().getItem(j), SWT.NONE);
+//				item.setText("Target: " + target);
+//			}
+//		}
+//	}
+	
 	public void exit() {
 		if(MessageDialog.openConfirm(m_jobGui.getParent().getShell(), 
 				"Confirmation", "Do you want to exit")){
